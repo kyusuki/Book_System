@@ -1,0 +1,66 @@
+# 创建数据库
+create database book_system;
+
+use book_system;
+
+
+# 创建用户信息表
+create table user
+(
+    id          int primary key auto_increment comment 'ID',
+    username    varchar(50)  not null unique comment '姓名',
+    password    varchar(100) not null comment '密码',
+    id_card     varchar(18)  not null comment '身份证号',
+    phone       varchar(11)  not null comment '联系方式',
+    user_type   char(1)  default 0 comment '0:普通用户 1:管理员',
+    create_time datetime default current_timestamp,
+    update_time datetime default current_timestamp on update current_timestamp
+) comment '用户信息表';
+
+
+# 创建图书表
+create table book
+(
+    isbn            varchar(20)  not null comment '版号',
+    title           varchar(200) not null comment '书名',
+    author          varchar(100) not null comment '出版人',
+    publisher       varchar(100) not null comment '出版社',
+    publish_date    date         not null comment '出版日期',
+    total_count     int      default 0 comment '总藏书目',
+    available_count int      default 0 comment '可借阅书目',
+    create_time     datetime default current_timestamp,
+    update_time     datetime default current_timestamp on update current_timestamp
+) comment '图书表';
+
+
+# 创建isbn索引，便于建立外键
+create index idx_book_isbn on book (isbn);
+
+
+# 创建借阅表
+create table borrow_record
+(
+    id          int primary key auto_increment comment 'ID',
+    borrow_name varchar(50) not null comment '借阅人姓名',
+    borrow_id   varchar(20) not null comment '借阅人学号',
+    book_isbn   varchar(20) not null comment '借阅书版号',
+    borrow_date datetime    not null comment '借阅时间',
+    return_date datetime    not null comment '归还时间',
+    status      char(1)  default 0 comment '0:借出中 1:已归还',
+    create_time datetime default current_timestamp,
+    foreign key (book_isbn) references book (isbn)
+) comment '借阅表';
+
+
+# 对表初始化
+insert into user(username, password, id_card, phone, user_type)
+values ('gyf', '111111', '111111111111111111', '11111111111', '1'),
+       ('dashuaige', '666666', '122222222222222222', '12222222222',
+        '1');
+
+insert into book(isbn, title, author, publisher, publish_date, total_count, available_count)
+values ('9787302662617', '计算机导论：微课视频版', '袁方', '清华大学出版社', '2024-05-01', 200, 150),
+       ('9787302389668', '计算机导论', '吕云翔，李沛伦', '清华大学出版社', '2015-04-01', 200, 150),
+       ('9787302030829', '计算机图形学（第三版）', '孙家广等', '清华大学出版社', '1998-09-01', 200, 150),
+       ('9787115392275', '计算机是怎样跑起来的', '（日）矢泽久雄', '人民邮电出版社', '2015-05-01', 200, 150),
+       ('9787111407010', '算法导论（第三版）', 'Thomas H. Cormen', '机械工业出版社', '2013-01-01', 200, 150);

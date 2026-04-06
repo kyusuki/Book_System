@@ -1,0 +1,16 @@
+target/
+*/target/
+
+.idea/
+*.iml
+*.iws
+*.ipr
+
+*.log
+logs/
+log/
+
+.DS_Store
+Thumbs.db
+*.tmp
+*.temp
