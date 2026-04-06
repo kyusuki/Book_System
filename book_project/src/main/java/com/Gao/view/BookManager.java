@@ -3,14 +3,19 @@ package com.Gao.view;
 import com.Gao.entity.Book;
 import com.Gao.entity.BorrowRecord;
 import com.Gao.util.DBHelper;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.sql.*;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class BookManager {
     private List<Book> bookList=new ArrayList<>(); //所有图书列表
     private List<BorrowRecord> recordList=new ArrayList<>(); //所有借阅记录列表
+    private static final Logger log= LoggerFactory.getLogger(BookManager.class);
     //添加图书
     public boolean addBook(Book book){
         String sql="insert into book(isbn, title, author, publisher, publish_date, total_count, available_count) values(?,?,?,?,?,?,?)";
@@ -22,9 +27,12 @@ public class BookManager {
             ps.setDate(5,Date.valueOf(book.getPublishDate()));
             ps.setInt(6,book.getTotalCount());
             ps.setInt(7,book.getAvailableCount());
+            log.info("添加图书{}成功，更新总藏书数为{}",book.getIsbn(),book.getTotalCount());
             return ps.executeUpdate()>0;
         }catch (SQLException e){
-            e.printStackTrace();
+//            e.printStackTrace();
+            log.warn("管理员添加图书{}错误",book.getIsbn());
+            log.error("执行添加sql错误",e);
             return false;
         }
     }
@@ -38,9 +46,12 @@ public class BookManager {
             ps.setDate(4,Date.valueOf(newBook.getPublishDate()));
             ps.setInt(5,newBook.getTotalCount());
             ps.setInt(6,newBook.getAvailableCount());
+            log.info("修改图书{}成功",newBook.getIsbn());
             return ps.executeUpdate()>0;
         }catch (SQLException e){
-            e.printStackTrace();
+//            e.printStackTrace();
+            log.warn("管理员修改图书{}错误",isbn);
+            log.error("执行修改sql错误",e);
             return false;
         }
     }
@@ -49,9 +60,12 @@ public class BookManager {
         String sql="delete from book where isbn=?";
         try(Connection conn=DBHelper.getConnection();PreparedStatement ps=conn.prepareStatement(sql)){
             ps.setString(1,isbn);
+            log.info("删除图书{}成功",isbn);
             return ps.executeUpdate()>0;
         }catch (SQLException e){
-            e.printStackTrace();
+//            e.printStackTrace();
+            log.warn("管理员修改图书{}错误",isbn);
+            log.error("执行删除sql错误",e);
             return false;
         }
     }
@@ -73,6 +87,7 @@ public class BookManager {
                 ps.setString(1,"%"+keyword+"%");
             }
             ResultSet rs=ps.executeQuery();
+            log.info("查询图书{}成功",keyword);
             while(rs.next()){
                 Book book=new Book();
                 book.setIsbn(rs.getString("isbn"));
@@ -85,7 +100,9 @@ public class BookManager {
                 result.add(book);
             }
         }catch (SQLException e){
-            e.printStackTrace();
+//            e.printStackTrace();
+            log.warn("管理员查询图书{}错误",keyword);
+            log.error("执行查询sql错误",e);
         }
         return result;
     }
@@ -104,6 +121,7 @@ public class BookManager {
             ResultSet rs=ps1.executeQuery();
             if(!rs.next()||rs.getInt(1)<=0){
                 conn.rollback();
+                log.warn("检查库存错误");
                 return false;
             }
             //更新库存
@@ -113,6 +131,7 @@ public class BookManager {
             int update=ps2.executeUpdate();
             if(update==0){
                 conn.rollback();
+                log.warn("更新库存错误");
                 return false;
             }
             //借阅记录
@@ -126,6 +145,7 @@ public class BookManager {
             ps2.setTimestamp(5,Timestamp.valueOf(now.plusDays(30)));
             ps2.executeUpdate();
             conn.commit();
+            log.info("更新借阅记录成功");
             return true;
         }catch (SQLException e){
             if(conn!=null){
@@ -133,7 +153,9 @@ public class BookManager {
                     conn.rollback();
                 }catch (SQLException ex){}
             }
-            e.printStackTrace();
+//            e.printStackTrace();
+            log.warn("借阅图书{}错误",isbn);
+            log.error("执行借阅sql错误",e);
             return false;
         }finally {
             DBHelper.close(conn,null,null);
@@ -165,6 +187,7 @@ public class BookManager {
             ResultSet rs=ps1.executeQuery();
             if(!rs.next()){
                 conn.rollback();
+                log.warn("查询未归还记录错误");
                 return false;
             }
             //更新借阅记录
@@ -181,6 +204,7 @@ public class BookManager {
             ps2.setString(1,isbn);
             ps2.executeUpdate();
             conn.commit();
+            log.info("更新图书{}库存成功",isbn);
             return true;
         }catch (SQLException e){
             if(conn!=null){
@@ -188,7 +212,9 @@ public class BookManager {
                     conn.rollback();
                 }catch (SQLException es){}
             }
-            e.printStackTrace();
+//            e.printStackTrace();
+            log.warn("归还图书{}错误",isbn);
+            log.error("执行归还sql错误",e);
             return false;
         }finally {
             DBHelper.close(conn,null,null);
@@ -222,7 +248,9 @@ public class BookManager {
                 result.add(book);
             }
         }catch (SQLException e){
-            e.printStackTrace();
+            log.warn("获取图书列表错误");
+//            e.printStackTrace();
+            log.error("执行获取列表sql错误",e);
         }
         return result;
     }
@@ -233,6 +261,7 @@ public class BookManager {
         try(Connection conn=DBHelper.getConnection();PreparedStatement ps=conn.prepareStatement(sql)){
             ps.setString(1,borrowerId);
             ResultSet rs= ps.executeQuery();
+            log.info("用户{}获取记录成功",borrowerId);
             while(rs.next()){
                 BorrowRecord record=new BorrowRecord();
                 record.setId(rs.getInt("id"));
@@ -252,7 +281,9 @@ public class BookManager {
                 records.add(record);
             }
         }catch (SQLException e){
-            e.printStackTrace();
+            log.warn("用户{}获取记录错误",borrowerId);
+//            e.printStackTrace();
+            log.error("执行获取记录sql错误",e);
         }
         return records;
     }
@@ -262,6 +293,7 @@ public class BookManager {
         String sql="select r.*,b.title as book_title from borrow_record as r left join book as b on r.book_isbn=b.isbn order by r.borrow_date desc";
         try(Connection conn=DBHelper.getConnection();PreparedStatement ps= conn.prepareStatement(sql)){
             ResultSet rs=ps.executeQuery();
+            log.info("管理员获取记录成功");
             while(rs.next()){
                 BorrowRecord record=new BorrowRecord();
                 record.setId(rs.getInt("id"));
@@ -281,7 +313,9 @@ public class BookManager {
                 records.add(record);
             }
         }catch (SQLException e){
-            e.printStackTrace();
+//            e.printStackTrace();
+            log.warn("管理员获取记录错误");
+            log.error("执行获取记录sql错误",e);
         }
         return records;
     }

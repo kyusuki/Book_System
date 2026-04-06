@@ -6,8 +6,12 @@ import com.Gao.dao.UserDao;
 import java.util.Scanner;
 import java.util.ArrayList;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class Register {
     private UserDao userDao=new UserDao();
+    private static final Logger log= LoggerFactory.getLogger(Register.class);
     //创建注册成员方法
     public void register(Scanner sc){
         User u=new User();
@@ -87,9 +91,11 @@ public class Register {
         u.setUserType(0); //默认注册为普通用户
         if(userDao.addUser(u)){
             System.out.println("用户"+u.getUsername()+"注册成功");
+            log.info("用户{}注册成功",u.getUsername());
         }
         else{
             System.out.println("注册失败");
+            log.warn("用户{}尝试注册错误",u.getUsername());
         }
         System.out.println();
     }

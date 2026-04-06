@@ -8,7 +8,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import com.Gao.view.BookManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class UserDao {
+    private static final Logger log= LoggerFactory.getLogger(UserDao.class);
     //添加用户
     public boolean addUser(User user){
         String sql="insert into user(username,password,id_card,phone,user_type) values(?,?,?,?,?)";
@@ -18,9 +23,12 @@ public class UserDao {
             ps.setString(3,user.getId());
             ps.setString(4,user.getPhone());
             ps.setInt(5,user.getUserType());
+            log.info("用户{}添加成功",user.getUsername());
             return ps.executeUpdate()>0;
         }catch (SQLException e){
-            e.printStackTrace();
+//            e.printStackTrace();
+            log.warn("用户{}添加错误",user.getUsername());
+            log.error("执行添加sql错误",e);
             return false;
         }
     }
@@ -30,9 +38,12 @@ public class UserDao {
         try(Connection conn=DBHelper.getConnection();PreparedStatement ps=conn.prepareStatement(sql)){
             ps.setString(1,username);
             ResultSet rs=ps.executeQuery();
+            log.info("查询用户{}存在",username);
             return rs.next();
         }catch (SQLException e){
-            e.printStackTrace();
+//            e.printStackTrace();
+            log.warn("查询用户{}未知错误",username);
+            log.error("执行存在校验sql错误",e);
             return false;
         }
     }
@@ -42,6 +53,7 @@ public class UserDao {
         try(Connection conn=DBHelper.getConnection();PreparedStatement ps=conn.prepareStatement(sql)){
             ps.setString(1,username);
             ResultSet rs=ps.executeQuery();
+            log.info("获取用户{}成功",username);
             if(rs.next()){
                 return new User(
                         rs.getString("username"),
@@ -52,7 +64,9 @@ public class UserDao {
                 );
             }
         }catch (SQLException e){
-            e.printStackTrace();
+//            e.printStackTrace();
+            log.warn("获取用户{}错误",username);
+            log.error("执行获取用户sql错误",e);
         }
         return null;
     }
@@ -62,9 +76,12 @@ public class UserDao {
         try(Connection conn=DBHelper.getConnection();PreparedStatement ps=conn.prepareStatement(sql)){
             ps.setString(1,newPassword);
             ps.setString(2,username);
+            log.info("用户{}更新密码{}成功",username,newPassword);
             return ps.executeUpdate()>0;
         }catch (SQLException e){
-            e.printStackTrace();
+//            e.printStackTrace();
+            log.warn("用户{}更新密码错误",username);
+            log.error("执行更新密码sql错误",e);
             return false;
         }
     }
@@ -76,9 +93,12 @@ public class UserDao {
             ps.setString(2,id_card);
             ps.setString(3,phone);
             ResultSet rs=ps.executeQuery();
+            log.info("用户{}身份验证成功",username);
             return rs.next();
         }catch (SQLException e){
-            e.printStackTrace();
+//            e.printStackTrace();
+            log.warn("用户{}验证身份错误",username);
+            log.error("执行身份验证sql错误",e);
             return false;
         }
     }
@@ -86,8 +106,10 @@ public class UserDao {
     public boolean verifyPassword(String username,String plainPassword){
         User user=getUserWithUsername(username);
         if(user==null){
+            log.warn("用户{}验证密码错误",username);
             return false;
         }
+        log.info("用户{}验证密码成功",username);
         return user.getPassword().equals(plainPassword);
     }
 }

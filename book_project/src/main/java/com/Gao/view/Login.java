@@ -6,9 +6,13 @@ import com.Gao.util.VerificationCode;
 
 import java.util.Scanner;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class Login {
     private int count=0; //成员变量
     private UserDao userDao=new UserDao();
+    private static final Logger log= LoggerFactory.getLogger(Login.class);
     //返回User类型
     public User login(Scanner sc){
         System.out.println();
@@ -40,6 +44,7 @@ public class Login {
         if(userDao.verifyPassword(username,password)){
             System.out.println("登录成功");
             count=0;
+            log.info("用户{}登录成功",username);
             return user;
         }
         else{
@@ -50,6 +55,7 @@ public class Login {
             }
             else{
                 System.out.println("登录失败");
+                log.warn("用户{}尝试登陆错误",username);
                 System.exit(0); //三次失败，直接退出
             }
         }
