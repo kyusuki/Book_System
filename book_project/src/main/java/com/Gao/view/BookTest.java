@@ -2,6 +2,7 @@ package com.Gao.view;
 
 import com.Gao.entity.Book;
 import com.Gao.entity.BorrowRecord;
+import com.Gao.entity.Category;
 import com.Gao.entity.User;
 import com.Gao.util.ClearScreen;
 
@@ -94,6 +95,13 @@ public class BookTest {
                     sc.nextLine(); //等待用户回车
                     cs.cleanScreen(); //清屏
                 }
+                case 10->{
+                    categoryManager();
+                    System.out.println("\n按回车键继续");
+                    sc.nextLine(); //消耗换行符
+                    sc.nextLine(); //等待用户回车
+                    cs.cleanScreen(); //清屏
+                }
                 case 0->{
                     System.out.println("已退出系统，返回主界面");
                     isReturn=false;
@@ -123,6 +131,7 @@ public class BookTest {
             System.out.println("    7.显示所有图书");
             System.out.println("    8.统计图书信息");
             System.out.println("    9.借阅记录查询");
+            System.out.println("    10.图书分类管理");
             System.out.println("    0.退出系统");
             System.out.print("请输入功能（1-0）：");
         }
@@ -157,7 +166,9 @@ public class BookTest {
         int totalCount=sc.nextInt();
         System.out.print("请输入当前库存（正整数）：");
         int availableCount=sc.nextInt();
-        Book newBook=new Book(isbn,title,author,publisher,publishDate,totalCount,availableCount);
+        System.out.print("请输入图书分类编号（1.计算机类 2.文学类 3.理工类 4.经管类 5.社科类）：");
+        int category_id=sc.nextInt();
+        Book newBook=new Book(isbn,title,author,publisher,publishDate,totalCount,availableCount,category_id);
         boolean isSuccess=mg.addBook(newBook);
         if(isSuccess){
             System.out.println("添加成功");
@@ -171,7 +182,7 @@ public class BookTest {
         System.out.println("----修改图书信息----");
         System.out.print("请输入要修改的ISBN号：");
         String isbn=sc.next();
-        List<Book> b=mg.searchBook(isbn, true);
+        List<Book> b=mg.searchBook(isbn, 1);
         if(b.isEmpty()){ //判断图书是否存在
             System.out.println("未找到该ISBN号的图书，修改失败");
             return;
@@ -188,7 +199,9 @@ public class BookTest {
         int totalCount=sc.nextInt();
         System.out.print("请输入新当前库存（正整数）：");
         int availableCount=sc.nextInt();
-        Book newBook=new Book(isbn,title,author,publisher,publishDate,totalCount,availableCount);
+        System.out.print("请输入新的图书分类编号（1.计算机类 2.文学类 3.理工类 4.经管类 5.社科类）：");
+        int category_id=sc.nextInt();
+        Book newBook=new Book(isbn,title,author,publisher,publishDate,totalCount,availableCount,category_id);
         boolean isSuccess=mg.updateBook(isbn, newBook);
         if(isSuccess){
             System.out.println("修改成功");
@@ -203,7 +216,7 @@ public class BookTest {
         System.out.println("----删除图书----");
         System.out.print("请输入要删除的ISBN号：");
         String isbn=sc.next();
-        List<Book> b=mg.searchBook(isbn, true);
+        List<Book> b=mg.searchBook(isbn, 1);
         if(b.isEmpty()){
             System.out.println("未找到该ISBN号的图书，删除失败");
             return;
@@ -222,11 +235,12 @@ public class BookTest {
         System.out.println("----查询图书----");
         System.out.println("1.根据ISBN号查询");
         System.out.println("2.根据书名查询");
+        System.out.println("3.根据分类查询");
         int choice=sc.nextInt();
         if(choice==1){
             System.out.print("请输入要查询的ISBN号：");
             String isbn=sc.next();
-            List<Book> b=mg.searchBook(isbn,true);
+            List<Book> b=mg.searchBook(isbn,1);
             if(b.isEmpty()){
                 System.out.println("未找到该ISBN号的图书");
                 return;
@@ -241,9 +255,24 @@ public class BookTest {
         else if(choice==2){
             System.out.print("请输入要查询的书名：");
             String title=sc.next();
-            List<Book> b=mg.searchBook(title, false);
+            List<Book> b=mg.searchBook(title, 2);
             if(b.isEmpty()){
                 System.out.println("未找到该书名的图书");
+                return;
+            }
+            else{
+                for(int i=0;i<b.size();i++){
+                    Book book=b.get(i);
+                    printBook(book);
+                }
+            }
+        }
+        else if(choice==3){
+            System.out.print("请输入要查询的分类（1.计算机类 2.文学类 3.理工类 4.经管类 5.社科类）：");
+            String category_id=sc.next();
+            List<Book> b=mg.searchBook(category_id,3);
+            if(b.isEmpty()){
+                System.out.println("未找到该分类的图书");
                 return;
             }
             else{
@@ -276,7 +305,7 @@ public class BookTest {
             System.out.println("借阅成功");
         }
         else{ //判断是没找到还是已借完
-            List<Book> b=mg.searchBook(isbn,true);
+            List<Book> b=mg.searchBook(isbn,1);
             if(b.isEmpty()){
                 System.out.println("借阅失败，未找到该ISBN对应的书");
             }
@@ -348,6 +377,7 @@ public class BookTest {
         System.out.println("出版日期："+book.getPublishDate());
         System.out.println("总藏书量："+book.getTotalCount()+"本");
         System.out.println("当前库存："+book.getAvailableCount()+"本");
+        System.out.println("本书分类："+book.getCategory_name());
         System.out.println("当前状态："+(book.getAvailableCount()>0?"可借":"已全部借出"));
     }
     //展示借阅记录
@@ -393,6 +423,125 @@ public class BookTest {
                 System.out.println("未归还");
             }
             System.out.println("状态："+status);
+        }
+    }
+
+    //图书分类管理
+    public void categoryManager(){
+        boolean isReturn=true;
+        while(isReturn){
+            System.out.println("    1.列出全部分类");
+            System.out.println("    2.新增分类");
+            System.out.println("    3.修改分类");
+            System.out.println("    4.删除分类");
+            System.out.println("    0.返回菜单");
+
+            System.out.print("请输入功能：");
+            int choice=sc.nextInt();
+            cs.cleanScreen();
+            switch (choice){
+                case 1->{
+                    listCategory();
+                    System.out.println("\n按回车键继续");
+                    sc.nextLine(); //消耗换行符
+                    sc.nextLine(); //等待用户回车
+                    cs.cleanScreen(); //清屏
+                }
+                case 2->{
+                    addCategory();
+                    System.out.println("\n按回车键继续");
+                    sc.nextLine(); //消耗换行符
+                    sc.nextLine(); //等待用户回车
+                    cs.cleanScreen(); //清屏
+                }
+                case 3->{
+                    updateCategory();
+                    System.out.println("\n按回车键继续");
+                    sc.nextLine(); //消耗换行符
+                    sc.nextLine(); //等待用户回车
+                    cs.cleanScreen(); //清屏
+                }
+                case 4->{
+                    deleteCategory();
+                    System.out.println("\n按回车键继续");
+                    sc.nextLine(); //消耗换行符
+                    sc.nextLine(); //等待用户回车
+                    cs.cleanScreen(); //清屏
+                }
+                case 0->{
+                    System.out.println("已返回主菜单");
+                    isReturn=false;
+                    cs.cleanScreen(); //清屏
+                }
+                default->{
+                    System.out.println("输入错误，请重新输入");
+                    System.out.println("\n按回车键继续");
+                    sc.nextLine(); //消耗换行符
+                    sc.nextLine(); //等待用户回车
+                    cs.cleanScreen(); //清屏
+                }
+            }
+            System.out.println();
+        }
+    }
+    //列出全部分类
+    public void listCategory(){
+        System.out.println("----分类信息----");
+        List<Category> categories=mg.listCategories();
+        if(categories.isEmpty()){
+            System.out.println("无分类信息");
+            return;
+        }
+        for(int i=0;i<categories.size();i++){
+            Category category=categories.get(i);
+            System.out.println(category);
+        }
+    }
+    //新增分类
+    public void addCategory(){
+        System.out.print("请输入新增分类类名：");
+        String name=sc.next();
+        System.out.print("请输入新增分类描述：");
+        String description=sc.next();
+        boolean result=mg.addCategory(name,description);
+        if(result){
+            System.out.println("添加新分类成功");
+        }
+        else{
+            System.out.println("添加新分类失败");
+        }
+    }
+    //修改分类
+    public void updateCategory(){
+        System.out.print("请输入需修改分类id：");
+        int id=sc.nextInt();
+        System.out.print("请输入新分类类名：");
+        String newName=sc.next();
+        System.out.print("请输入新分类描述：");
+        String newDescription=sc.next();
+        boolean result=mg.updateCategory(id,newName,newDescription);
+        if(result){
+            System.out.println("修改分类成功");
+        }
+        else{
+            System.out.println("修改分类失败");
+        }
+    }
+    //删除分类
+    public void deleteCategory(){
+        System.out.print("请输入需删除分类的id：");
+        int id=sc.nextInt();
+        List<Book> books=mg.searchCategory(id);
+        if(!(books.isEmpty())){
+            System.out.println("该分类下仍有图书，删除失败");
+            return;
+        }
+        boolean result=mg.deleteCategory(id);
+        if(result){
+            System.out.println("删除该分类成功");
+        }
+        else{
+            System.out.println("删除该分类失败");
         }
     }
 }

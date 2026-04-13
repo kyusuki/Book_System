@@ -8,8 +8,12 @@ public class Book {
     private String publishDate; //出版日期
     private int totalCount; //总书量
     private int availableCount; //可借书量
+
+    private int category_id; //图书分类id
+    private String category_name; //图书分类类别
+
     public Book(){}
-    public Book(String isbn,String title,String author,String publisher,String publishDate,int totalCount,int availableCount){
+    public Book(String isbn,String title,String author,String publisher,String publishDate,int totalCount,int availableCount,int category_id){
         this.isbn=isbn;
         this.title=title;
         this.author=author;
@@ -17,6 +21,7 @@ public class Book {
         this.publishDate=publishDate;
         this.totalCount=totalCount;
         this.availableCount=availableCount;
+        this.category_id=category_id;
     }
     public void setIsbn(String isbn){
         this.isbn=isbn;
@@ -59,6 +64,18 @@ public class Book {
     }
     public int getAvailableCount(){
         return availableCount;
+    }
+    public void setCategory_id(int category_id){
+        this.category_id=category_id;
+    }
+    public int getCategory_id(){
+        return category_id;
+    }
+    public void setCategory_name(String category_name){
+        this.category_name=category_name;
+    }
+    public String getCategory_name(){
+        return category_name;
     }
 }
 

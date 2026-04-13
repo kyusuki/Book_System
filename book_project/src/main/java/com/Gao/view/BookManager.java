@@ -2,6 +2,7 @@ package com.Gao.view;
 
 import com.Gao.entity.Book;
 import com.Gao.entity.BorrowRecord;
+import com.Gao.entity.Category;
 import com.Gao.util.DBHelper;
 
 import java.time.LocalDateTime;
@@ -13,12 +14,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class BookManager {
-    private List<Book> bookList=new ArrayList<>(); //所有图书列表
-    private List<BorrowRecord> recordList=new ArrayList<>(); //所有借阅记录列表
+//    private List<Book> bookList=new ArrayList<>(); //所有图书列表
+//    private List<BorrowRecord> recordList=new ArrayList<>(); //所有借阅记录列表
     private static final Logger log= LoggerFactory.getLogger(BookManager.class);
     //添加图书
     public boolean addBook(Book book){
-        String sql="insert into book(isbn, title, author, publisher, publish_date, total_count, available_count) values(?,?,?,?,?,?,?)";
+        String sql="insert into book(isbn, title, author, publisher, publish_date, total_count, available_count, category_id) values(?,?,?,?,?,?,?,?)";
         try(Connection conn=DBHelper.getConnection();PreparedStatement ps=conn.prepareStatement(sql)){
             ps.setString(1,book.getIsbn());
             ps.setString(2,book.getTitle());
@@ -27,6 +28,7 @@ public class BookManager {
             ps.setDate(5,Date.valueOf(book.getPublishDate()));
             ps.setInt(6,book.getTotalCount());
             ps.setInt(7,book.getAvailableCount());
+            ps.setInt(8,book.getCategory_id());
             log.info("添加图书{}成功，更新总藏书数为{}",book.getIsbn(),book.getTotalCount());
             return ps.executeUpdate()>0;
         }catch (SQLException e){
@@ -38,7 +40,7 @@ public class BookManager {
     }
     //修改图书信息
     public boolean updateBook(String isbn,Book newBook){
-        String sql="update book set title=?,author=?,publisher=?,publish_date=?,total_count=?,available_count=? where isbn=?";
+        String sql="update book set title=?,author=?,publisher=?,publish_date=?,total_count=?,available_count=?,category_id=? where isbn=?";
         try(Connection conn=DBHelper.getConnection();PreparedStatement ps=conn.prepareStatement(sql)){
             ps.setString(1,newBook.getTitle());
             ps.setString(2,newBook.getAuthor());
@@ -46,6 +48,8 @@ public class BookManager {
             ps.setDate(4,Date.valueOf(newBook.getPublishDate()));
             ps.setInt(5,newBook.getTotalCount());
             ps.setInt(6,newBook.getAvailableCount());
+            ps.setInt(7,newBook.getCategory_id());
+            ps.setString(8,isbn);
             log.info("修改图书{}成功",newBook.getIsbn());
             return ps.executeUpdate()>0;
         }catch (SQLException e){
@@ -70,21 +74,27 @@ public class BookManager {
         }
     }
     //查询图书
-    public List<Book> searchBook(String keyword,boolean isbnSearch){
+    public List<Book> searchBook(String keyword,int flag){
         List<Book> result=new ArrayList<>(); //创建结果列表
-        String sql;
-        if(isbnSearch){
-            sql="select * from book where isbn=?";
+        String sql=null;
+        if(flag==1){
+            sql="select b.*,c.name as category_name from book b left join category c on b.category_id=c.id where isbn=?";
         }
-        else{
-            sql="select * from book where title like ?";
+        else if(flag==2){
+            sql="select b.*,c.name as category_name from book b left join category c on b.category_id=c.id where title like ?";
+        }
+        else if(flag==3){
+            sql="select b.*,c.name as category_name from book b left join category c on b.category_id=c.id where category_id=?";
         }
         try(Connection conn=DBHelper.getConnection();PreparedStatement ps=conn.prepareStatement(sql)){
-            if(isbnSearch){
+            if(flag==1){
                 ps.setString(1,keyword);
             }
-            else{
+            else if(flag==2){
                 ps.setString(1,"%"+keyword+"%");
+            }
+            else if(flag==3){
+                ps.setInt(1,Integer.parseInt(keyword));
             }
             ResultSet rs=ps.executeQuery();
             log.info("查询图书{}成功",keyword);
@@ -97,6 +107,8 @@ public class BookManager {
                 book.setPublishDate(rs.getDate("publish_date").toString());
                 book.setTotalCount(rs.getInt("total_count"));
                 book.setAvailableCount(rs.getInt("available_count"));
+                book.setCategory_id(rs.getInt("category_id"));
+                book.setCategory_name(rs.getString("category_name"));
                 result.add(book);
             }
         }catch (SQLException e){
@@ -234,7 +246,7 @@ public class BookManager {
     public List<Book> getBookList(){
 //        return bookList;
         List<Book> result=new ArrayList<>();
-        String sql="select * from book";
+        String sql="select b.*,c.name as category_name from book b left join category c on b.category_id=c.id";
         try(Connection conn=DBHelper.getConnection();Statement stmt=conn.createStatement();ResultSet rs=stmt.executeQuery(sql)){
             while(rs.next()){
                 Book book=new Book();
@@ -245,6 +257,8 @@ public class BookManager {
                 book.setPublishDate(rs.getDate("publish_date").toString());
                 book.setTotalCount(rs.getInt("total_count"));
                 book.setAvailableCount(rs.getInt("available_count"));
+                book.setCategory_id(rs.getInt("category_id"));
+                book.setCategory_name(rs.getString("category_name"));
                 result.add(book);
             }
         }catch (SQLException e){
@@ -318,5 +332,96 @@ public class BookManager {
             log.error("执行获取记录sql错误",e);
         }
         return records;
+    }
+
+    //管理员分类管理
+    //管理员查询分类情况
+    public List<Category> listCategories(){
+        List<Category> result=new ArrayList<>();
+        String sql="select id,name,description from category order by id";
+        try(Connection conn=DBHelper.getConnection();PreparedStatement ps=conn.prepareStatement(sql)){
+            ResultSet rs=ps.executeQuery();
+            log.info("管理员获取分类信息成功");
+            while(rs.next()){
+                Category category=new Category();
+                category.setId(rs.getInt("id"));
+                category.setName(rs.getString("name"));
+                category.setDescription(rs.getString("description"));
+                result.add(category);
+            }
+        }catch (SQLException e){
+            log.warn("管理员获取分类信息错误");
+            log.error("执行获取分类信息sql错误",e);
+        }
+        return result;
+    }
+    //管理员添加分类信息操作
+    public boolean addCategory(String name,String description){
+        String sql="insert into category(name,description) values(?,?)";
+        try(Connection conn=DBHelper.getConnection();PreparedStatement ps=conn.prepareStatement(sql)){
+            ps.setString(1,name);
+            ps.setString(2,description);
+            log.info("管理员添加新分类成功");
+            return ps.executeUpdate()>0;
+        }catch (SQLException e){
+            log.warn("管理员添加新分类错误");
+            log.error("执行添加新分类sql错误",e);
+            return false;
+        }
+    }
+    //管理员修改分类信息操作
+    public boolean updateCategory(int id,String name,String description){
+        String sql="update category set name=?,description=? where id=?";
+        try(Connection conn=DBHelper.getConnection();PreparedStatement ps=conn.prepareStatement(sql)){
+            ps.setString(1,name);
+            ps.setString(2,description);
+            ps.setInt(3,id);
+            log.info("管理员修改分类编号{}信息成功",id);
+            return ps.executeUpdate()>0;
+        }catch (SQLException e){
+            log.warn("管理员修改分类编号{}信息错误",id);
+            log.error("执行修改分类信息sql错误",e);
+            return false;
+        }
+    }
+    //管理员删除某类别操作
+    public boolean deleteCategory(int id){
+        String sql="delete from category where id=?";
+        try(Connection conn=DBHelper.getConnection();PreparedStatement ps=conn.prepareStatement(sql)){
+            ps.setInt(1,id);
+            log.info("管理员删除分类编号{}成功",id);
+            return ps.executeUpdate()>0;
+        }catch (SQLException e){
+            log.warn("管理员删除分类编号{}错误",id);
+            log.error("执行删除分类类别sql错误",e);
+            return false;
+        }
+    }
+    //查询指定分类id下图书
+    public List<Book> searchCategory(int id){
+        List<Book> books=new ArrayList<>();
+        String sql="select b.*,c.name as category_name from book b left join category c on b.category_id=c.id where category_id=?";
+        try(Connection conn=DBHelper.getConnection();PreparedStatement ps=conn.prepareStatement(sql)){
+            ps.setInt(1,id);
+            ResultSet rs=ps.executeQuery();
+            log.info("查询指定分类id下图书成功");
+            while(rs.next()){
+                Book book=new Book();
+                book.setIsbn(rs.getString("isbn"));
+                book.setTitle(rs.getString("title"));
+                book.setAuthor(rs.getString("author"));
+                book.setPublisher(rs.getString("publisher"));
+                book.setPublishDate(rs.getDate("publish_date").toString());
+                book.setTotalCount(rs.getInt("total_count"));
+                book.setAvailableCount(rs.getInt("available_count"));
+                book.setCategory_id(rs.getInt("category_id"));
+                book.setCategory_name(rs.getString("category_name"));
+                books.add(book);
+            }
+        } catch (SQLException e) {
+            log.warn("查询指定分类id下图书错误");
+            log.error("执行查询指定分类id图书sql错误",e);
+        }
+        return books;
     }
 }
