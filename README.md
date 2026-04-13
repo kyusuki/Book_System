@@ -37,6 +37,7 @@
 | | 用户登录 | 支持管理员和普通用户登录 |
 | | 密码重置 | 用户自助密码重置 |
 | **图书管理** | 增删改查 | 新增、删除、修改、查询图书信息 |
+| | 图书分类 | 支持图书分类管理与分类维度查询 |
 | | 图书搜索 | 按 ISBN、标题、作者等条件搜索 |
 | | 库存统计 | 实时统计图书库存情况 |
 | **借阅系统** | 借书功能 | 用户按 ISBN 借阅图书 |
@@ -51,7 +52,7 @@
 - 🧪 **测试覆盖**：编写 JUnit 单元测试和集成测试
 - 📝 **日志系统**：已实现基础的 SLF4J 日志查询
 - 🎨 **界面优化**：升级到图形界面(Swing/JavaFX)
-- 📊 **功能扩展**：图书分类、借阅统计分析等
+- 📊 **功能扩展**：借阅统计分析等
 
 ---
 
@@ -100,7 +101,7 @@ mysql -u root -p < MySQL_statements.txt
 
 **数据库初始化包含的操作：**
 - 创建数据库 `sql_book`
-- 创建 `users`、`books`、`borrow_records` 等表
+- 创建 `users`、`books`、`borrow_records`、`categories` 等表
 - 插入示例管理员和用户数据
 - 插入示例图书数据
 
@@ -170,6 +171,7 @@ java -cp target/book_project-1.0-SNAPSHOT.jar com.Gao.view.App
 | 账户类型 | 用户名 | 密码 | 说明 |
 |--------|--------|------|------|
 | 管理员 | `gyf` | `111111` | 拥有图书管理权限 |
+| 管理员 | `dashuaige` | `666666` | 拥有图书管理权限 |
 | 普通用户 | `user1` | `user123` | 仅有借阅权限 |
 
 ### 示例操作流程
@@ -207,37 +209,39 @@ java -cp target/book_project-1.0-SNAPSHOT.jar com.Gao.view.App
 
 ```
 Sql_Book/
-├── MySQL_statements.txt          # 数据库初始化脚本
-├── book_project/                 # 主项目目录
-│   ├── pom.xml                   # Maven 配置文件
+├── MySQL_statements.txt              # 数据库初始化脚本
+├── book_project/                     # 主项目目录
+│   ├── pom.xml                       # Maven 配置文件
 │   │
 │   ├── src/main/java/com/Gao/
-│   │   ├── entity/               # 实体类包
-│   │   │   ├── Book.java         # 图书实体
-│   │   │   ├── User.java         # 用户实体
-│   │   │   └── BorrowRecord.java # 借阅记录实体
+│   │   ├── entity/                   # 实体类包
+│   │   │   ├── Book.java             # 图书实体
+│   │   │   ├── User.java             # 用户实体
+│   │   │   ├── BorrowRecord.java     # 借阅记录实体
+│   │   │   └── Category.java         # 类别实体
 │   │   │
-│   │   ├── dao/                  # 数据访问层
-│   │   │   ├── BookDAO.java      # 图书数据操作
-│   │   │   ├── UserDAO.java      # 用户数据操作
-│   │   │   └── BorrowRecordDAO.java # 借阅记录操作
+│   │   ├── dao/                      # 数据访问层
+│   │   │   └── UserDao.java          # 用户数据操作
 │   │   │
-│   │   ├── util/                 # 工具类包
-│   │   │   ├── DBHelper.java     # 数据库连接助手
-│   │   │   ├── DBConfig.java     # 数据库配置管理
-│   │   │   └── PasswordUtil.java # 密码工具（可扩展）
+│   │   ├── util/                     # 工具类包
+│   │   │   ├── DBHelper.java         # 数据库连接助手
+│   │   │   ├── ClearScreen.java      # 终端清屏工具
+│   │   │   └── VerificationCode.java # 验证码生成工具
 │   │   │
-│   │   └── view/                 # 视图/控制层
-│   │       ├── App.java          # 程序入口
-│   │       ├── LoginView.java    # 登录界面
-│   │       ├── AdminView.java    # 管理员菜单
-│   │       ├── UserView.java     # 用户菜单
-│   │       └── BookManager.java  # 图书管理相关业务逻辑
+│   │   └── view/                     # 视图/控制层
+│   │       ├── App.java              # 程序入口
+│   │       ├── Login.java            # 登录
+│   │       ├── Register.java         # 注册
+│   │       ├── Forget.java           # 忘记密码
+|   |       ├── BookTest.java         # 图书管理测试类
+│   │       └── BookManager.java      # 图书管理相关业务逻辑
 │   │
 │   └── src/main/resources/
-│       └── db.properties         # 数据库配置文件
+│       ├── db.properties             # 数据库配置文件
+|       └── logback.xml               # 日志配置文件
+|       
 │
-└── README.md                      # 本文件
+└── README.md                         # 本文件
 ```
 
 ### 关键包说明
@@ -252,8 +256,8 @@ Sql_Book/
 ### 核心类说明
 
 - **DBHelper.java**：管理数据库连接，使用 HikariCP 连接池
-- **BookDAO.java**：实现图书的增删改查、搜索、库存统计等操作
-- **UserDAO.java**：管理用户登录、注册、密码重置等操作
+- **BookManager.java**：实现图书的增删改查、搜索、库存统计等操作
+- **UserDao.java**：管理用户登录、注册、密码重置等操作
 - **App.java**：程序主入口，控制整个应用流程
 
 ---
@@ -300,7 +304,6 @@ Sql_Book/
   - SQL 注入防护
 - 🎨 **界面升级**：使用 Swing 或 JavaFX 构建图形界面
 - 📊 **功能扩展**：
-  - 添加图书分类功能
   - 借阅统计分析
   - 用户行为追踪
 - 📚 **文档完善**：改进 API 文档和使用说明
