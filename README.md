@@ -1,324 +1,244 @@
-# Sql_Book - 图书管理系统
+# Sql_Book - 图书管理系统（Web + Java）
 
-[![Java Version](https://img.shields.io/badge/Java-25-blue)](https://www.oracle.com/java/)
-[![MySQL](https://img.shields.io/badge/MySQL-5.7+-green)](https://www.mysql.com/)
-[![Maven](https://img.shields.io/badge/Maven-3.x-orange)](https://maven.apache.org/)
+[![Java](https://img.shields.io/badge/Java-17%2B-blue)](https://www.oracle.com/java/)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.3.6-brightgreen)](https://spring.io/projects/spring-boot)
+[![MySQL](https://img.shields.io/badge/MySQL-5.7%2B-green)](https://www.mysql.com/)
 [![License](https://img.shields.io/badge/License-MIT-brightgreen)](LICENSE)
 
-## 📖 项目简介
+## 项目简介
 
-**Sql_Book** 是一款基于 Java 和 MySQL 的图书管理系统，是学习 JDBC 与 SQL 操作的优秀实践项目。
+Sql_Book 是一个基于 Java + MySQL 的图书管理系统。当前版本已升级为 Spring Boot Web 应用，内置前端页面，可直接在浏览器完成登录、图书管理、借还书和分类管理。
 
-### 核心特点
+项目仍保留早期控制台代码，便于学习 JDBC 与业务逻辑设计；默认推荐使用 Web 入口运行。
 
-- 🎯 **原生 SQL 设计**：采用原生 JDBC 实现，不依赖 ORM 框架，深入理解 SQL 执行流程
-- 👥 **双角色管理**：支持管理员和普通用户两种角色，权限管理清晰
-- 🔄 **事务处理**：借阅/还书操作使用数据库事务保证数据一致性
-- 💾 **连接池技术**：集成 HikariCP 提升数据库连接效率
-- 📚 **完整示例数据**：提供初始化脚本和示例数据快速上手
+## 本次更新重点
 
-### 学习价值
+- 新增 Web 前端页面（登录/注册/忘记密码/图书管理/分类管理/借阅统计）
+- 新增基于 Session 的登录态校验与接口拦截
+- 新增图书、分类、借阅记录 REST API
+- 前后端统一使用 JSON 响应结构，便于联调与扩展
+- 保留原有 BookManager、DAO、实体层逻辑
 
-本项目适合以下学习场景：
-- Java 开发者深入学习 JDBC 与数据库连接管理
-- SQL 实践学习，理解持久层设计模式
-- 完整的控制台应用开发流程
-- 真实场景的业务逻辑实现
+## 功能清单
 
-**局限性说明**：当前版本采用明文密码存储、缺少单元测试。建议在生产环境中增加密码加密、安全验证及完整的测试覆盖。
+### 认证与账号
 
----
+- 验证码登录
+- 用户注册
+- 忘记密码重置
+- 会话登录态检查（/api/auth/me）
+- 退出登录
 
-## ✨ 功能特性
+### 图书管理
 
-| 功能模块 | 具体功能 | 说明 |
-|--------|--------|------|
-| **用户管理** | 用户注册 | 新用户注册账户 |
-| | 用户登录 | 支持管理员和普通用户登录 |
-| | 密码重置 | 用户自助密码重置 |
-| **图书管理** | 增删改查 | 新增、删除、修改、查询图书信息 |
-| | 图书分类 | 支持图书分类管理与分类维度查询 |
-| | 图书搜索 | 按 ISBN、标题、作者等条件搜索 |
-| | 库存统计 | 实时统计图书库存情况 |
-| **借阅系统** | 借书功能 | 用户按 ISBN 借阅图书 |
-| | 还书功能 | 用户归还借阅的图书 |
-| | 记录查询 | 查看借阅历史记录 |
-| **数据库集成** | MySQL 支持 | 完整的关系型数据库集成 |
-| | 事务处理 | 重要操作使用事务保证数据完整性 |
+- 图书列表查询
+- 按 ISBN / 书名 / 分类搜索
+- 新增图书（管理员）
+- 修改图书（管理员）
+- 删除图书（管理员）
 
-### 可优化方向
+### 借阅业务
 
-- 🔒 **安全增强**：添加密码加密（BCrypt/MD5）、权限验证
-- 🧪 **测试覆盖**：编写 JUnit 单元测试和集成测试
-- 📝 **日志系统**：已实现基础的 SLF4J 日志查询
-- 🎨 **界面优化**：升级到图形界面(Swing/JavaFX)
-- 📊 **功能扩展**：借阅统计分析等
+- 借书
+- 还书
+- 借阅记录查询
+- 图书统计（总种数、有库存种数、借空种数）
 
----
+### 分类管理
 
-## 🛠️ 环境要求
+- 分类列表查询
+- 新增分类（管理员）
+- 修改分类（管理员）
+- 删除分类（管理员，且分类下无图书）
 
-### 必需环境
-- **Java 8** 及以上（推荐 **Java 25**）
-- **MySQL 5.7** 及以上
-- **Maven 3.x** 及以上
+## 角色权限
 
-### 推荐工具
-- **IDE**：IntelliJ IDEA 或 Eclipse
-- **数据库工具**：MySQL Workbench、Navicat
+- 管理员（user_type=1）
+  - 图书和分类的增删改
+  - 可代他人借书、代还书
+  - 查看全部借阅记录
+- 普通用户（user_type=0）
+  - 浏览图书、搜索图书
+  - 借书和还书（基于本人身份）
+  - 查看自己的借阅记录
 
-### 验证环境
+## 技术栈
+
+- 后端
+  - Spring Boot 3.3.6
+  - Spring Web
+  - Spring JDBC
+  - HikariCP
+- 前端
+  - 原生 HTML + CSS + JavaScript（无框架）
+- 数据库
+  - MySQL 5.7+
+- 构建
+  - Maven
+
+## 项目结构
+
+```text
+Sql_Book/
+├── MySQL_statements.txt
+├── README.md
+└── book_project/
+    ├── pom.xml
+    ├── src/main/java/com/Gao/
+    │   ├── ProjectWebApplication.java      # Web 启动入口
+    │   ├── dao/
+    │   ├── entity/
+    │   ├── util/
+    │   ├── view/                           # 早期控制台入口与交互逻辑
+    │   └── web/
+    │       ├── config/                     # 拦截器与 MVC 配置
+    │       ├── controller/                 # Web API 控制器
+    │       ├── dto/
+    │       └── service/
+    └── src/main/resources/
+        ├── application.properties
+        ├── application.yaml
+        ├── db.properties
+        └── static/
+            ├── index.html                  # 前端页面
+            ├── app.js                      # 前端逻辑
+            └── styles.css
+```
+
+## 运行环境
+
+- JDK 17 及以上（推荐与 pom 对齐）
+- Maven 3.8+
+- MySQL 5.7+
+
+可使用以下命令确认环境：
+
 ```bash
 java -version
-mvn --version
+mvn -version
 mysql --version
 ```
 
----
+## 快速开始
 
-## 🚀 安装与运行
+### 1. 初始化数据库
 
-### 1. 克隆或下载项目
-
-```bash
-# 使用 Git 克隆
-git clone <repository-url>
-cd Sql_Book/book_project
-
-# 或直接下载 ZIP 文件后解压
-```
-
-### 2. 数据库配置
-
-执行 `MySQL_statements.txt` 文件中的 SQL 语句创建数据库、表和示例数据：
+在 MySQL 中执行根目录 SQL 脚本：
 
 ```bash
-# 使用 MySQL 命令行工具
 mysql -u root -p < MySQL_statements.txt
-
-# 或在 MySQL Workbench 中执行脚本
 ```
 
-**数据库初始化包含的操作：**
-- 创建数据库 `sql_book`
-- 创建 `users`、`books`、`borrow_records`、`categories` 等表
-- 插入示例管理员和用户数据
-- 插入示例图书数据
+脚本会创建并使用数据库 book_system，并初始化用户、图书、分类等表结构与示例数据。
 
-### 3. 修改数据库配置
+### 2. 修改数据库连接
 
-编辑 `src/main/resources/db.properties` 文件，填入您的 MySQL 连接信息：
+主要配置位置：
 
-```properties
-# 默认配置（需根据实际环境修改）
-db.driver=com.mysql.jdbc.Driver
-db.url=jdbc:mysql://localhost:3306/sql_book
-db.user=root
-db.password=666666
-db.pool.size=10
+- book_project/src/main/resources/application.yaml
+- book_project/src/main/resources/db.properties
+
+默认示例（按本机修改）：
+
+```yaml
+spring:
+  datasource:
+    url: jdbc:mysql://127.0.0.1:3306/book_system?useUnicode=true&characterEncoding=utf8&autoReconnectForPools=true&useSSL=false
+    username: root
+    password: 666666
+    driver-class-name: com.mysql.cj.jdbc.Driver
 ```
 
-### 4. 构建项目
+### 3. 启动项目（Web 模式）
+
+进入子项目目录并启动：
 
 ```bash
-# 清理并编译项目
-mvn clean compile
-
-# 生成项目包（可选）
-mvn package
+cd book_project
+mvn spring-boot:run
 ```
 
-### 5. 运行程序
+默认端口：9098
 
-**方式一：使用 Maven 运行**
+浏览器访问：
+
+- 首页：http://localhost:9098/
+- 前端会调用同源 API：http://localhost:9098/api
+
+### 4. 可选：运行控制台版本
+
+如果需要体验旧版控制台流程：
+
 ```bash
+cd book_project
 mvn exec:java -Dexec.mainClass="com.Gao.view.App"
 ```
 
-**方式二：使用 IDE 运行**
-- 在 IntelliJ IDEA 中：打开 `App.java`，右击选择 `Run 'App.main()'`
-- 在 Eclipse 中：右击项目选择 `Run As` > `Java Application`
+## 主要 API 概览
 
-**方式三：使用 JAR 包运行**
-```bash
-mvn package
-java -cp target/book_project-1.0-SNAPSHOT.jar com.Gao.view.App
-```
+### 认证
 
-### 🔧 常见问题排查
+- GET /api/auth/captcha
+- POST /api/auth/login
+- POST /api/auth/logout
+- GET /api/auth/me
+- POST /api/auth/register
+- POST /api/auth/forgot-password
 
-| 问题 | 解决方案 |
-|-----|--------|
-| **数据库连接失败** | ✓ 检查 MySQL 服务是否启动<br/>✓ 验证 db.properties 中的连接信息<br/>✓ 确认数据库用户名密码正确 |
-| **端口 3306 被占用** | ✓ 修改 MySQL 端口或检查是否有其他服务占用<br/>✓ 在 db.properties 中修改连接端口 |
-| **ClassNotFoundException** | ✓ 执行 `mvn clean install` 下载依赖<br/>✓ 检查 MySQL JDBC 驱动是否在 pom.xml 中 |
-| **Permission denied** | ✓ 检查 MySQL 用户权限<br/>✓ 确保用户有数据库读写权限 |
+### 图书与借阅
 
----
+- GET /api/books
+- GET /api/books/search?mode=isbn|title|category&keyword=...
+- POST /api/books
+- PUT /api/books/{isbn}
+- DELETE /api/books/{isbn}
+- POST /api/books/borrow
+- POST /api/books/return
+- GET /api/books/stats
+- GET /api/borrow-records
 
-## 📖 使用说明
+### 分类
 
-### 程序流程
+- GET /api/categories
+- POST /api/categories
+- PUT /api/categories/{id}
+- DELETE /api/categories/{id}
 
-1. **启动程序**：运行 `App.java` 后显示登录菜单
-2. **用户登录**：输入用户名和密码
-3. **角色选择**：管理员和普通用户享受不同的功能菜单
-4. **菜单操作**：根据角色通过菜单选项进行相应操作
-5. **退出程序**：选择"退出"选项结束程序
+说明：除验证码、登录、注册、忘记密码外，其余 /api 接口均需登录后访问。
 
-### 预置账户
+## 预置账号
 
-| 账户类型 | 用户名 | 密码 | 说明 |
-|--------|--------|------|------|
-| 管理员 | `gyf` | `111111` | 拥有图书管理权限 |
-| 管理员 | `dashuaige` | `666666` | 拥有图书管理权限 |
-| 普通用户 | `user1` | `user123` | 仅有借阅权限 |
+SQL 脚本默认初始化两个管理员账号：
 
-### 示例操作流程
+- gyf / 111111
+- dashuaige / 666666
 
-**场景：普通用户借阅图书**
+普通用户可通过前端注册页面自行创建。
 
-```
-欢迎使用图书管理系统
-================================
-1. 用户登录
-2. 管理员登录
-3. 注册新用户
-4. 退出系统
-请选择: 1
+## 常见问题
 
-请输入用户名: user1
-请输入密码: user123
+- 访问首页报错或空白
+  - 检查是否从 ProjectWebApplication 启动
+  - 检查端口 9098 是否被占用
+- 登录后接口返回未授权
+  - 确认浏览器允许携带 Cookie（前端使用 credentials: include）
+- 数据库连接失败
+  - 检查 application.yaml 与 db.properties 中的账号密码
+  - 确认 MySQL 服务已启动，数据库名为 book_system
 
-用户菜单
-================================
-1. 查看可借图书
-2. 借书 (需输入 ISBN)
-3. 还书 (需输入 ISBN)
-4. 查看借阅记录
-5. 退出登录
-请选择: 2
+## 已知限制
 
-请输入图书 ISBN: 978-7-111-xxxxx
-借书成功！
-```
+- 当前密码仍为明文存储，不适合生产环境
+- 暂未提供系统化单元测试/集成测试
+- 前端未接入复杂组件库，适合教学与演示场景
 
----
+## 后续建议
 
-## 📁 项目结构
+- 接入 BCrypt 密码加密
+- 增加 JUnit + MockMvc 测试
+- 增加分页、排序、导出等管理能力
+- 增加操作审计日志与权限细分
 
-```
-Sql_Book/
-├── MySQL_statements.txt              # 数据库初始化脚本
-├── book_project/                     # 主项目目录
-│   ├── pom.xml                       # Maven 配置文件
-│   │
-│   ├── src/main/java/com/Gao/
-│   │   ├── entity/                   # 实体类包
-│   │   │   ├── Book.java             # 图书实体
-│   │   │   ├── User.java             # 用户实体
-│   │   │   ├── BorrowRecord.java     # 借阅记录实体
-│   │   │   └── Category.java         # 类别实体
-│   │   │
-│   │   ├── dao/                      # 数据访问层
-│   │   │   └── UserDao.java          # 用户数据操作
-│   │   │
-│   │   ├── util/                     # 工具类包
-│   │   │   ├── DBHelper.java         # 数据库连接助手
-│   │   │   ├── ClearScreen.java      # 终端清屏工具
-│   │   │   └── VerificationCode.java # 验证码生成工具
-│   │   │
-│   │   └── view/                     # 视图/控制层
-│   │       ├── App.java              # 程序入口
-│   │       ├── Login.java            # 登录
-│   │       ├── Register.java         # 注册
-│   │       ├── Forget.java           # 忘记密码
-|   |       ├── BookTest.java         # 图书管理测试类
-│   │       └── BookManager.java      # 图书管理相关业务逻辑
-│   │
-│   └── src/main/resources/
-│       ├── db.properties             # 数据库配置文件
-|       └── logback.xml               # 日志配置文件
-|       
-│
-└── README.md                         # 本文件
-```
+## 许可证
 
-### 关键包说明
-
-| 包名 | 职责 | 示例 |
-|-----|------|------|
-| **entity** | 数据模型，映射数据库表 | `Book` 对应 `books` 表 |
-| **dao** | 数据访问层，负责 CRUD 操作 | 执行 SQL 查询、插入、更新、删除 |
-| **util** | 工具类，提供通用功能 | 数据库连接、配置管理 |
-| **view** | 视图层，用户交互界面 | 菜单显示、数据输入、结果输出 |
-
-### 核心类说明
-
-- **DBHelper.java**：管理数据库连接，使用 HikariCP 连接池
-- **BookManager.java**：实现图书的增删改查、搜索、库存统计等操作
-- **UserDao.java**：管理用户登录、注册、密码重置等操作
-- **App.java**：程序主入口，控制整个应用流程
-
----
-
-## 🤝 贡献指南
-
-感谢您对本项目的关注！欢迎通过以下方式贡献代码和建议。
-
-### 如何贡献
-
-1. **Fork 项目**
-   ```bash
-   点击 GitHub 上的 "Fork" 按钮
-   ```
-
-2. **创建分支**
-   ```bash
-   git clone https://github.com/your-username/Sql_Book.git
-   cd Sql_Book
-   git checkout -b feature/your-feature-name
-   ```
-
-3. **提交更改**
-   ```bash
-   git add .
-   git commit -m "Add your feature description"
-   ```
-
-4. **提交 Pull Request**
-   ```bash
-   git push origin feature/your-feature-name
-   ```
-   然后在 GitHub 上创建 Pull Request
-
-### 改进建议
-
-欢迎以下方面的改进建议和 PR：
-
-- 🧪 **添加 JUnit 单元测试**：提升代码质量和可维护性
-- 📝 **集成日志系统**：改进 SLF4J 记录应用日志
-- 🔒 **增强安全性**：
-  - 实现密码加密（BCrypt、MD5）
-  - 添加权限控制机制
-  - SQL 注入防护
-- 🎨 **界面升级**：使用 Swing 或 JavaFX 构建图形界面
-- 📊 **功能扩展**：
-  - 借阅统计分析
-  - 用户行为追踪
-- 📚 **文档完善**：改进 API 文档和使用说明
-
-### 代码规范
-
-- 遵循 Google Java 代码风格指南
-- 使用有意义的变量名和方法名
-- 为复杂逻辑添加注释
-- 提交前运行 `mvn clean compile` 确保编译通过
-
----
-
-## 📄 许可证
-
-本项目采用 **MIT 协议**，详见 [LICENSE](LICENSE) 文件。
-
----
+本项目采用 MIT 协议，详见 LICENSE。

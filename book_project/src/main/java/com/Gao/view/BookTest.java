@@ -208,7 +208,6 @@ public class BookTest {
         }
         else{
             System.out.println("修改失败，ISBN号不存在");
-            return;
         }
     }
     //删除操作
@@ -227,7 +226,6 @@ public class BookTest {
         }
         else{
             System.out.println("删除失败，ISBN号不存在");
-            return;
         }
     }
     //查询操作
@@ -243,7 +241,6 @@ public class BookTest {
             List<Book> b=mg.searchBook(isbn,1);
             if(b.isEmpty()){
                 System.out.println("未找到该ISBN号的图书");
-                return;
             }
             else{
                 for(int i=0;i<b.size();i++){
@@ -258,7 +255,6 @@ public class BookTest {
             List<Book> b=mg.searchBook(title, 2);
             if(b.isEmpty()){
                 System.out.println("未找到该书名的图书");
-                return;
             }
             else{
                 for(int i=0;i<b.size();i++){
@@ -273,7 +269,6 @@ public class BookTest {
             List<Book> b=mg.searchBook(category_id,3);
             if(b.isEmpty()){
                 System.out.println("未找到该分类的图书");
-                return;
             }
             else{
                 for(int i=0;i<b.size();i++){

@@ -4,7 +4,6 @@ import com.Gao.entity.User;
 import com.Gao.util.ClearScreen;
 
 import java.util.Scanner;
-import java.util.ArrayList;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,7 +13,6 @@ public class App {
     public static void main(String[] args){
         System.out.println("欢迎使用学生管理系统");
         ClearScreen cs=new ClearScreen(); //声明清屏工具
-        ArrayList<User> userList=new ArrayList<>(); //全局用户列表
         Scanner sc=new Scanner(System.in); //全局扫描器
         Login l=new Login(); //只创建一次Login对象
         while(true){
@@ -23,7 +21,6 @@ public class App {
             String choice=sc.next();
             switch(choice){
                 case "1"->{
-                    //while(true){
                     User u=l.login(sc);
                     log.info("用户{}执行登录操作",u.getUsername());
                     if(u!=null){
@@ -36,13 +33,11 @@ public class App {
                         String choice2=sc.next();
                         switch(choice2){
                             case "1"->{
-                                break;
                             }
                             case "2"->{
                                 log.info("用户{}执行忘记密码操作",u.getUsername());
                                 Forget f=new Forget(); //创建Forget对象
                                 f.forget(sc); //调用忘记密码方法
-                                break;
                             }
                             case "3"->{
                                 log.info("用户{}似乎放弃了思考",u.getUsername());
@@ -51,7 +46,6 @@ public class App {
                             default->System.out.println("输入错误");
                         }
                     }
-                    //}
                 }
                 case "2"->{
                     log.info("新用户注册");

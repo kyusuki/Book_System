@@ -14,8 +14,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class BookManager {
-//    private List<Book> bookList=new ArrayList<>(); //所有图书列表
-//    private List<BorrowRecord> recordList=new ArrayList<>(); //所有借阅记录列表
     private static final Logger log= LoggerFactory.getLogger(BookManager.class);
     //添加图书
     public boolean addBook(Book book){
@@ -32,7 +30,6 @@ public class BookManager {
             log.info("添加图书{}成功，更新总藏书数为{}",book.getIsbn(),book.getTotalCount());
             return ps.executeUpdate()>0;
         }catch (SQLException e){
-//            e.printStackTrace();
             log.warn("管理员添加图书{}错误",book.getIsbn());
             log.error("执行添加sql错误",e);
             return false;
@@ -53,7 +50,6 @@ public class BookManager {
             log.info("修改图书{}成功",newBook.getIsbn());
             return ps.executeUpdate()>0;
         }catch (SQLException e){
-//            e.printStackTrace();
             log.warn("管理员修改图书{}错误",isbn);
             log.error("执行修改sql错误",e);
             return false;
@@ -67,7 +63,6 @@ public class BookManager {
             log.info("删除图书{}成功",isbn);
             return ps.executeUpdate()>0;
         }catch (SQLException e){
-//            e.printStackTrace();
             log.warn("管理员修改图书{}错误",isbn);
             log.error("执行删除sql错误",e);
             return false;
@@ -112,7 +107,6 @@ public class BookManager {
                 result.add(book);
             }
         }catch (SQLException e){
-//            e.printStackTrace();
             log.warn("管理员查询图书{}错误",keyword);
             log.error("执行查询sql错误",e);
         }
@@ -165,7 +159,6 @@ public class BookManager {
                     conn.rollback();
                 }catch (SQLException ex){}
             }
-//            e.printStackTrace();
             log.warn("借阅图书{}错误",isbn);
             log.error("执行借阅sql错误",e);
             return false;
@@ -224,7 +217,6 @@ public class BookManager {
                     conn.rollback();
                 }catch (SQLException es){}
             }
-//            e.printStackTrace();
             log.warn("归还图书{}错误",isbn);
             log.error("执行归还sql错误",e);
             return false;
@@ -244,7 +236,6 @@ public class BookManager {
     }
     //获取图书列表
     public List<Book> getBookList(){
-//        return bookList;
         List<Book> result=new ArrayList<>();
         String sql="select b.*,c.name as category_name from book b left join category c on b.category_id=c.id";
         try(Connection conn=DBHelper.getConnection();Statement stmt=conn.createStatement();ResultSet rs=stmt.executeQuery(sql)){
@@ -263,7 +254,6 @@ public class BookManager {
             }
         }catch (SQLException e){
             log.warn("获取图书列表错误");
-//            e.printStackTrace();
             log.error("执行获取列表sql错误",e);
         }
         return result;
@@ -296,7 +286,6 @@ public class BookManager {
             }
         }catch (SQLException e){
             log.warn("用户{}获取记录错误",borrowerId);
-//            e.printStackTrace();
             log.error("执行获取记录sql错误",e);
         }
         return records;
@@ -327,7 +316,6 @@ public class BookManager {
                 records.add(record);
             }
         }catch (SQLException e){
-//            e.printStackTrace();
             log.warn("管理员获取记录错误");
             log.error("执行获取记录sql错误",e);
         }

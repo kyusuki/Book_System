@@ -8,7 +8,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import com.Gao.view.BookManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,7 +25,6 @@ public class UserDao {
             log.info("用户{}添加成功",user.getUsername());
             return ps.executeUpdate()>0;
         }catch (SQLException e){
-//            e.printStackTrace();
             log.warn("用户{}添加错误",user.getUsername());
             log.error("执行添加sql错误",e);
             return false;
@@ -41,7 +39,6 @@ public class UserDao {
             log.info("查询用户{}存在",username);
             return rs.next();
         }catch (SQLException e){
-//            e.printStackTrace();
             log.warn("查询用户{}未知错误",username);
             log.error("执行存在校验sql错误",e);
             return false;
@@ -64,7 +61,6 @@ public class UserDao {
                 );
             }
         }catch (SQLException e){
-//            e.printStackTrace();
             log.warn("获取用户{}错误",username);
             log.error("执行获取用户sql错误",e);
         }
@@ -79,7 +75,6 @@ public class UserDao {
             log.info("用户{}更新密码{}成功",username,newPassword);
             return ps.executeUpdate()>0;
         }catch (SQLException e){
-//            e.printStackTrace();
             log.warn("用户{}更新密码错误",username);
             log.error("执行更新密码sql错误",e);
             return false;
@@ -96,7 +91,6 @@ public class UserDao {
             log.info("用户{}身份验证成功",username);
             return rs.next();
         }catch (SQLException e){
-//            e.printStackTrace();
             log.warn("用户{}验证身份错误",username);
             log.error("执行身份验证sql错误",e);
             return false;

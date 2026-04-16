@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: book_project
+  datasource:
+    url: jdbc:mysql://127.0.0.1:3306/book_system?useUnicode=true&characterEncoding=utf8&autoReconnectForPools=true&useSSL=false
+    username: root
+    password: 666666
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+Logging:
+  level:
+    com.Gao: debug

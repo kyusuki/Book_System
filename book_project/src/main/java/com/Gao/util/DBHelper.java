@@ -1,6 +1,5 @@
 package com.Gao.util;
 
-import com.Gao.dao.UserDao;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
@@ -29,7 +28,6 @@ public class DBHelper {
             config.setConnectionTimeout(30000);
             dataSource=new HikariDataSource(config); //创建连接池
         }catch (Exception e){
-//            e.printStackTrace();
             log.error("数据库连接错误",e);
         }
     }
